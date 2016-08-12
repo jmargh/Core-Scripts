@@ -19,6 +19,7 @@ local GuiRoot = CoreGuiService:WaitForChild('RobloxGui')
 local tenFootInterface = require(GuiRoot.Modules.TenFootInterface)
 local utility = require(GuiRoot.Modules.Settings.Utility)
 local recordPage = require(GuiRoot.Modules.Settings.Pages.Record)
+require(GuiRoot.Modules.PlayerlistModules.PlayerlistMain)
 
 --[[ VARIABLES ]]
 local gamepadSettingsFrame = nil
@@ -256,10 +257,10 @@ local function createGamepadMenuGui()
 	-------- Player List ------------
 	local playerListFunc = function() 
 		toggleCoreGuiRadial(true)
-		local PlayerListModule = require(GuiRoot.Modules.PlayerlistModule)
-		if not PlayerListModule:IsOpen() then
-			PlayerListModule:ToggleVisibility()
-		end
+		local PlayerListModule = require(GuiRoot.Modules.PlayerlistModules.PlayerlistMain)
+		--if not PlayerListModule:IsOpen() then
+			--PlayerListModule:ToggleVisibility()
+		--end
 	end
 	local playerListRadial = createRadialButton("PlayerList", "Player List", 2, not StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList), Enum.CoreGuiType.PlayerList, playerListFunc)
 	playerListRadial.Parent = gamepadSettingsFrame
