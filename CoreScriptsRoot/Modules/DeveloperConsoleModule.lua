@@ -2725,34 +2725,36 @@ do
 			return permissions
 		end
 		permissions = {}
+		local playerPermissionsModule = require(Modules.PlayerPermissionsModule)
+		permissions.IsCreator = playerPermissionsModule.CanManagePlaceAsync(game:GetService("Players").LocalPlayer.userId)
 		
-		pcall(function()
-			permissions.CreatorFlagValue = settings():GetFFlag("UseCanManageApiToDetermineConsoleAccess")
-		end)
+		-- pcall(function()
+		-- 	permissions.CreatorFlagValue = settings():GetFFlag("UseCanManageApiToDetermineConsoleAccess")
+		-- end)
 	
-		pcall(function()
-			-- This might not support group games, I'll leave it up to "UseCanManageApiToDetermineConsoleAccess"
-			permissions.IsCreator = permissions.CreatorFlagValue or game:GetService("Players").LocalPlayer.userId == game.CreatorId
-		end)
+		-- pcall(function()
+		-- 	-- This might not support group games, I'll leave it up to "UseCanManageApiToDetermineConsoleAccess"
+		-- 	permissions.IsCreator = permissions.CreatorFlagValue or game:GetService("Players").LocalPlayer.userId == game.CreatorId
+		-- end)
 		
-		if permissions.CreatorFlagValue then -- Use the new API
-			permissions.IsCreator = false
-			local success, result = pcall(function()
-				local url = string.format("/users/%d/canmanage/%d", game:GetService("Players").LocalPlayer.userId, game.PlaceId)
-				return game:GetService('HttpRbxApiService'):GetAsync(url, false, Enum.ThrottlingPriority.Default)
-			end)
-			if success and type(result) == "string" then
-				-- API returns: {"Success":BOOLEAN,"CanManage":BOOLEAN}
-				-- Convert from JSON to a table
-				-- pcall in case of invalid JSON
-				success, result = pcall(function()
-					return game:GetService('HttpService'):JSONDecode(result)
-				end)
-				if success and result.CanManage == true then
-					permissions.IsCreator = result.CanManage
-				end
-			end
-		end
+		-- if permissions.CreatorFlagValue then -- Use the new API
+		-- 	permissions.IsCreator = false
+		-- 	local success, result = pcall(function()
+		-- 		local url = string.format("/users/%d/canmanage/%d", game:GetService("Players").LocalPlayer.userId, game.PlaceId)
+		-- 		return game:GetService('HttpRbxApiService'):GetAsync(url, false, Enum.ThrottlingPriority.Default)
+		-- 	end)
+		-- 	if success and type(result) == "string" then
+		-- 		-- API returns: {"Success":BOOLEAN,"CanManage":BOOLEAN}
+		-- 		-- Convert from JSON to a table
+		-- 		-- pcall in case of invalid JSON
+		-- 		success, result = pcall(function()
+		-- 			return game:GetService('HttpService'):JSONDecode(result)
+		-- 		end)
+		-- 		if success and result.CanManage == true then
+		-- 			permissions.IsCreator = result.CanManage
+		-- 		end
+		-- 	end
+		-- end
 		
 		permissions.ClientCodeExecutionEnabled = false
 		pcall(function()
@@ -2975,8 +2977,8 @@ local function onDevConsoleVisibilityChanged(isVisible)
 		-- block menu open input while dev console is open
 		ContextActionService:BindCoreAction(blockMenuActionName, function() end, false, Enum.KeyCode.ButtonStart)
 
-		local menuModule = require(Modules.Settings.SettingsHub)
-		menuModule:SetVisibility(false, true)
+		--local menuModule = require(Modules.Settings.SettingsHub)
+		--menuModule:SetVisibility(false, true)
 		ContextActionService:BindCoreAction(closeDevConsoleActionName, closeDevConsole, false, Enum.KeyCode.ButtonB)
 
 		GuiService:AddSelectionParent(selectionParentName, myDeveloperConsole.Frame)

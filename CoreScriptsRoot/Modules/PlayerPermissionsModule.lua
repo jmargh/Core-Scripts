@@ -1,4 +1,12 @@
+--[[
+]]
+local CoreGui = game:GetService('CoreGui')
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local Http = require(RobloxGui.Modules.Common.Http)
+
 local PlayerPermissionsModule = {}
+
+local CAN_MANAGE_PATH = "/users/%d/canmanage/%d"
 
 local function HasRankInGroupFunctionFactory(groupId, requiredRank)
 	local hasRankCache = {}
@@ -32,6 +40,32 @@ local function IsInGroupFunctionFactory(groupId)
 			return inGroupCache[player.UserId]
 		end
 		return false
+	end
+end
+
+function PlayerPermissionsModule.CanManagePlaceAsync(userId)
+	if not userId then
+		return false
+	end
+
+	-- user is the place owner
+	if game.CreatorType == Enum.CreatorType.User and userId == game.CreatorId then
+		return true
+	end
+
+	-- check if user can manage group game
+	if game.CreatorType == Enum.CreatorType.Group then
+		local success, result = pcall(function()
+			return settings():GetFFlag("UseCanManageApiToDetermineConsoleAccess")
+		end)
+
+		if success and result == true then
+			local placeId = game.PlaceId
+			local path = string.format(CAN_MANAGE_PATH, userId, placeId)
+			local result = Http.RbxApiGetAsync(path)
+
+			return result and result["CanManage"] or false
+		end
 	end
 end
 

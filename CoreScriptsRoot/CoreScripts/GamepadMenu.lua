@@ -619,6 +619,8 @@ local function setupGamepadControls()
 		end
 	end
 
+	print(InputService:GetGamepadConnected(Enum.UserInputType.Gamepad1))
+
 	if InputService:GetGamepadConnected(Enum.UserInputType.Gamepad1) then
 		createGamepadMenuGui()
 	else

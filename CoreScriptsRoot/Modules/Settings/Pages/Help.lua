@@ -24,6 +24,12 @@ local PageInstance = nil
 RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
 local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
 
+local enableDevConsoleOnXboxSuccess, enableDevConsoleOnXboxResult = pcall(function() return settings():GetFFlag("EnableDevConsoleOnXbox") end)
+local devConsoleEnabledXbox = enableDevConsoleOnXboxSuccess and enableDevConsoleOnXboxResult == true
+
+local showDevConsoleOptionMobileSuccess, showDevConsoleOptionMobileResult = pcall(function() return settings():GetFFlag("ShowDevConsoleOptionInHelpMenuMobile") end)
+local devConsoleEnabledMobile = showDevConsoleOptionMobileSuccess and showDevConsoleOptionMobileResult == true
+
 ----------- CLASS DECLARATION --------------
 
 local function Initialize()
@@ -34,6 +40,9 @@ local function Initialize()
 	local lastInputType = nil
 
 	function this:GetCurrentInputType()
+		-- TODO: REMOVE!!!!!!!!!!!!!!!!!!!!!!
+		if true then return TOUCH_TAG end
+
 		if lastInputType == nil then -- we don't know what controls the user has, just use reasonable defaults
 			local platform = UserInputService:GetPlatform()
 			if platform == Enum.Platform.XBoxOne or platform == Enum.Platform.WiiU then
@@ -60,6 +69,11 @@ local function Initialize()
 		return KEYBOARD_MOUSE_TAG
 	end
 
+	local function openDevConsoleFunc()
+		this.HubRef:SetVisibility(false)
+		local devConsoleModule = require(RobloxGui.Modules.DeveloperConsoleModule)
+		devConsoleModule:SetVisibility(true)
+	end
 
 	local function createPCHelp(parentFrame)
 		local function createPCGroup(title, actionInputBindings)
@@ -268,9 +282,15 @@ local function Initialize()
 			createGamepadLabel("Camera Zoom", UDim2.new(0.91,0,0.77,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
 		end
 
+		if devConsoleEnabledXbox then
+			local devConsoleButton = utility:MakeStyledButton("ConsoleButton", "Open Developer Console",
+				UDim2.new(0, 300, 0, 44), openDevConsoleFunc)
+			devConsoleButton.Size = UDim2.new(devConsoleButton.Size.X.Scale, devConsoleButton.Size.X.Offset, 0, 60)
+			devConsoleButton.Position = UDim2.new(1, -300, 1, 30)
+			devConsoleButton.Parent = gamepadImageLabel
 
-		-- NOTE: On consoles we put the dev console in the settings menu. Only place
-		-- owners can see this for now.
+			this:AddRow(nil, nil, devConsoleButton, 340)
+		end
 	end
 
 	local function createTouchHelp(parentFrame)
@@ -348,6 +368,13 @@ local function Initialize()
 		local useToolLabel = createTouchLabel("Use Tool", UDim2.new(0.85,-60,0.02,0), UDim2.new(0,120,0,ySize), parentFrame)
 		createTouchGestureImage("ToolImage", "rbxasset://textures/ui/Settings/Help/UseToolGesture.png", UDim2.new(0.5,-19,1,3), UDim2.new(0,38,0,52), useToolLabel)
 
+		devConsoleEnabledMobile = true
+		if devConsoleEnabledMobile then
+			local devConsoleButton, devConsoleText = utility:MakeStyledButton("ConsoleButton", "Open Developer Console",
+				UDim2.new(0, 260, 0, 44), openDevConsoleFunc)
+			devConsoleButton.Position = UDim2.new(1, -260, 1, 44)
+			devConsoleButton.Parent = parentFrame
+		end
 	end
 
 	local function createHelpDisplay(typeOfHelp)
@@ -435,6 +462,22 @@ local function Initialize()
 	return this
 end
 
+local haveCheckedDevConsolePremission = false
+local function setDevConsoleOption()
+	-- only check first time the user focuses the help menu
+	if haveCheckedDevConsolePremission then return end
+	haveCheckedDevConsolePremission = true
+
+	local playerPermissionsModule = require(RobloxGui.Modules.PlayerPermissionsModule)
+	canManagePlace =  playerPermissionsModule.CanManagePlaceAsync(game:GetService("Players").LocalPlayer.userId)
+	canManagePlace = true
+	if canManagePlace and PageInstance then
+		local inputType = PageInstance:GetCurrentInputType()
+		local helpFrame = PageInstance.HelpPages[inputType]
+		-- TODO: make button for frame?
+	end
+end
+
 
 ----------- Public Facing API Additions --------------
 do
@@ -446,6 +489,8 @@ do
 				PageInstance.HubRef.BottomButtonFrame.Visible = false
 			end
 		end
+
+		setDevConsoleOption()
 	end)
 
 	PageInstance.Hidden.Event:connect(function()
