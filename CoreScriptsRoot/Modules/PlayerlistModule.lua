@@ -105,7 +105,6 @@ local IsSmallScreenDevice = UserInputService.TouchEnabled and GuiService:GetScre
 
 local BaseUrl = game:GetService('ContentProvider').BaseUrl:lower()
 BaseUrl = string.gsub(BaseUrl, "/m.", "/www.")
-AssetGameUrl = string.gsub(BaseUrl, 'www', 'assetgame')
 
 --[[ Constants ]]--
 local ENTRY_PAD = 2
@@ -207,12 +206,6 @@ end
 local function setAvatarIconAsync(player, iconImage)
   -- this function is pretty much for xbox right now and makes use of modules that are part
   -- of the xbox app. Please see Kip or Jason if you have any questions
-  local useSubdomainsFlagExists, useSubdomainsFlagValue = pcall(function() return settings():GetFFlag("UseNewSubdomainsInCoreScripts") end)
-  local thumbsUrl = BaseUrl
-  if(useSubdomainsFlagExists and useSubdomainsFlagValue and AssetGameUrl~=nil) then
-    thumbsUrl = AssetGameUrl
-  end
-
   local thumbnailLoader = nil
   pcall(function()
     thumbnailLoader = require(RobloxGui.Modules.Shell.ThumbnailLoader)

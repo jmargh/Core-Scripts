@@ -2766,9 +2766,8 @@ t.CreateSetPanel = function(userIdsForSets, objectSelected, dialogClosed, size, 
 	local BaseUrl = game:GetService("ContentProvider").BaseUrl:lower()
 	local AssetGameUrl = string.gsub(BaseUrl, "www", "assetgame")
 	
-	local useSubdomainsFlagExists, useSubdomainsFlagValue = pcall(function () return settings():GetFFlag("UseNewSubdomainsInCoreScripts") end)
 	local gameToolsUrl = BaseUrl
-	if(useSubdomainsFlagExists and useSubdomainsFlagValue and AssetGameUrl~=nil) then
+	if AssetGameUrl ~= nil then
 		gameToolsUrl = AssetGameUrl
 	end
 	
